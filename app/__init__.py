@@ -1,31 +1,17 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 
-movies = {
-    "ddlj": {
-        "name": "Dilwale Dulhania Le Jayenge",
-        "hero": "Shah Rukh Khan",
-        "heroine": "Kajol",
+
+usersData = {
+    'admin': {
+        'username': 'admin',
+        'password': 'admin',
+        'email': 'admin@anb.com'
     },
-    "kgf": {
-        "name": "KGF",
-        "hero": "Yash",
-        "heroine": "Srinidhi Shetty",
-    },
-    "harrypotter": {
-        "name": "Harry Potter",
-        "hero": "Daniel Radcliffe",
-        "heroine": "Emma Watson",
-    },
-    "pk": {
-        "name": "PK",
-        "hero": "Aamir Khan",
-        "heroine": "Anushka Sharma",
-    },
-    "3idiots": {
-        "name": "3 Idiots",
-        "hero": "Aamir Khan",
-        "heroine": "Kareena Kapoor",
-    },
+    'siddhant': {
+        'username': 'siddhant',
+        'password': 'sid@123',
+        'email': 'sid@gmail.com'
+    }
 }
 
 
@@ -33,26 +19,80 @@ def create_app():
     app = Flask(__name__)
 
     @app.route('/')
-    def index():
-        return "Hello World"
+    @app.route('/signup', methods=['GET', 'POST'])
+    def signup():
 
-    # dynamic route
-    @app.route('/cars/<string:car_id>')
-    def car(car_id):
-        return f"Car ID: {car_id}"
+        form_data = request.form
 
-    # parameterized route
-    @app.route('/movies')
-    def movie():
-        name = request.args.get('name')
+        username = form_data.get('username')
+        email = form_data.get('email')
+        password = form_data.get('password')
+        confirm_password = form_data.get('confirm')
 
-        if name is None:
-            return "Please provide a movie name"
+        if request.method == 'POST':
+            if not len(username) or username == '':
+                return render_template('signup.html', title='Sign Up', error={"message": 'Username is required'})
 
-        if name not in movies:
-            return "Movie not found"
+            if not len(email) or email == '':
+                return render_template('signup.html', title='Sign Up', error={"message": 'Email is required'})
 
-        if name in movies:
-            return movies[name]
+            if not len(password) or password == '':
+                return render_template('signup.html', title='Sign Up', error={"message": 'Password is required'})
+
+            if not len(confirm_password) or confirm_password == '':
+                return render_template('signup.html', title='Sign Up', error={"message": 'Confirm Password is required'})
+
+            if password != confirm_password:
+                return render_template('signup.html', title='Sign Up', error={"message": 'Password and Confirm Password must match'})
+
+            # check if user already exists
+
+            if username in usersData:
+                return render_template('signup.html', title='Sign Up', error={"message": 'User already exists'})
+
+            usersData[username] = {
+                "username": username,
+                "password": password,
+                "email": email
+            }
+
+            print(usersData)
+            return render_template('signup.html', title='Sign Up', success={"message": 'User created successfully'})
+
+        return render_template('signup.html', title='Sign Up')
+
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+
+        if request.method == 'POST':
+            form_data = request.form
+
+            username = form_data.get('username')
+            password = form_data.get('password')
+
+            if not len(username) or username == '':
+                return render_template('login.html', title='Login', error={"message": 'Username is required'})
+
+            if not len(password) or password == '':
+                return render_template('login.html', title='Login', error={"message": 'Password is required'})
+
+            if username not in usersData:
+                return render_template('login.html', title='Login', error={"message": 'Username or password incorrect'})
+
+            if usersData[username]['password'] != password:
+                return render_template('login.html', title='Login', error={"message": 'Username or password incorrect'})
+
+            return redirect(url_for('home'))
+
+        return render_template('login.html', title='Login')
+
+    @app.route('/home')
+    def home():
+        users = []
+        for user in usersData:
+            print(user)
+            users.append(usersData[user])
+
+        return render_template('home.html', title='Home', users=users)
 
     return app
