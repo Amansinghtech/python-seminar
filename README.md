@@ -8,7 +8,7 @@
 - [ ] Web Basics (10 min)
 - [ ] Virtual Environment Setup (5 min)
 - [ ] Flask and Django, Why Flask? (5 min)
-- [ ] Flask Hello World (5 min)
+- [ ] Flask Hello World (dynamic Routes, Params) (5 min)
 - [ ] Project Structure (5 min)
 - [ ] Jinja2 Template Engine (10 min)
 - [ ] add a simple Registration Page (10 min)
